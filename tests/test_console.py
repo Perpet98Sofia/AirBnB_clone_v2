@@ -29,7 +29,7 @@ class TestConsole(unittest.TestCase):
         """setup for the test"""
 
         try:
-            os.rename("file.json","tmp")
+            os.rename("file.json", "tmp")
         except IOError:
             pass
         cls.consol = HBNBCommand()
@@ -42,7 +42,7 @@ class TestConsole(unittest.TestCase):
         except IOError:
             pass
         del cls.consol
-        if type(models.storage) == DBStorage:
+        if type(models.storage) is DBStorage:
             models.storage._DBStorage__session.close()
 
     def setUp(self):
@@ -103,7 +103,7 @@ class TestConsole(unittest.TestCase):
                 self.assertEqual(
                     "** class doesn't exist **\n", f.getvalue())
 
-    @unittest.skipIf(type(models.storage) == DBStorage, "Test DBS")
+    @unittest.skipIf(type(models.storage) is DBStorage, "Test DBS")
     def test_create(self):
         """Test create command inpout"""
         with patch('sys.stdout', new=StringIO()) as f:
@@ -152,8 +152,7 @@ class TestConsole(unittest.TestCase):
             self.consol.onecmd("all Amenity")
             self.assertIn(amn, f.getvalue())
 
-
-    @unittest.skipIf(type(models.storage) == DBStorage, "Test DBS")
+    @unittest.skipIf(type(models.storage) is DBStorage, "Test DBS")
     def test_kwargs(self):
         with patch("sys.stdout", new=StringIO()) as f:
             get = ("create Place city_id='001' name='My_little_house' "
@@ -207,7 +206,7 @@ class TestConsole(unittest.TestCase):
             self.assertEqual(
                 "** no instance found **\n", f.getvalue())
 
-    @unittest.skipIf(type(models.storage) == DBStorage, "Test DBS")
+    @unittest.skipIf(type(models.storage) is DBStorage, "Test DBS")
     def test_all(self):
         """Test all command inpout"""
         with patch('sys.stdout', new=StringIO()) as f:
@@ -217,7 +216,7 @@ class TestConsole(unittest.TestCase):
             self.consol.onecmd("all State")
             self.assertEqual("[]\n", f.getvalue())
 
-    @unittest.skipIf(type(models.storage) == DBStorage, "Test DBS")
+    @unittest.skipIf(type(models.storage) is DBStorage, "Test DBS")
     def test_update(self):
         """Test update command inpout"""
         with patch('sys.stdout', new=StringIO()) as f:
@@ -249,7 +248,7 @@ class TestConsole(unittest.TestCase):
             self.assertEqual(
                 "** value missing **\n", f.getvalue())
 
-    @unittest.skipIf(type(models.storage) == DBStorage, "Test DBS")
+    @unittest.skipIf(type(models.storage) is DBStorage, "Test DBS")
     def test_z_all(self):
         """Test alternate all command inpout"""
         with patch('sys.stdout', new=StringIO()) as f:
@@ -260,7 +259,7 @@ class TestConsole(unittest.TestCase):
             self.consol.onecmd("State.all()")
             self.assertEqual("[]\n", f.getvalue())
 
-    @unittest.skipIf(type(models.storage) == DBStorage, "Test DBS")
+    @unittest.skipIf(type(models.storage) is DBStorage, "Test DBS")
     def test_z_count(self):
         """Test count command inpout"""
         with patch('sys.stdout', new=StringIO()) as f:
@@ -293,7 +292,7 @@ class TestConsole(unittest.TestCase):
             self.assertEqual(
                 "** no instance found **\n", f.getvalue())
 
-    @unittest.skipIf(type(models.storage) == DBStorage, "Test DBS")
+    @unittest.skipIf(type(models.storage) is DBStorage, "Test DBS")
     def test_update(self):
         """Test alternate destroy command inpout"""
         with patch('sys.stdout', new=StringIO()) as f:
@@ -317,5 +316,5 @@ class TestConsole(unittest.TestCase):
             self.assertEqual(
                 "** no instance found **\n", f.getvalue())
 
-if __name__ == "__main__":
+if __name__ is "__main__":
     unittest.main()

@@ -11,6 +11,7 @@ import models
 
 metadata = Base.metadata
 
+
 class Place(BaseModel, Base):
     """This is the class for Place
     Attributes:
@@ -50,4 +51,3 @@ class Place(BaseModel, Base):
                                  String(60),
                                  ForeignKey('amenities.id'),
                                  primary_key=True, nullable=False))
-
