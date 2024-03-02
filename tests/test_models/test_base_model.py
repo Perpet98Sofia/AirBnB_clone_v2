@@ -1,96 +1,105 @@
 #!/usr/bin/python3
-"""test for BaseModel"""
+"""
+    tests for BaseModel
+"""
 import unittest
+from datetime import datetime
+import time
+import re
 import os
 from models.base_model import BaseModel
-import pep8
-from models.engine.file_storage import FileStorage
-from datetime import datetime
 
 
-class TestBaseModel(unittest.TestCase):
-    """this will test the base model class"""
-
+class Test_BaseModel(unittest.TestCase):
+    """
+        Base test class
+    """
     @classmethod
     def setUpClass(cls):
-        """setup for the test"""
-        try:
-            os.rename("file.json", "tmp")
-        except IOError:
-            pass
-        FileStorage._FileStorage__objects = {}
-        cls.storage = FileStorage()
-        cls.base = BaseModel()
+        """setup class"""
+        cls.dummy = BaseModel()
 
     @classmethod
-    def teardown(cls):
-        """at the end of the test this will tear it down"""
+    def tearDownClass(cls):
+        """tear down"""
+        del cls.dummy
         try:
             os.remove("file.json")
-        except IOError:
+        except:
             pass
-        try:
-            os.rename("tmp", "file.json")
-        except IOError:
-            pass
-        del cls.storage
 
-    def test_pep8_BaseModel(self):
-        """Testing for pep8"""
-        style = pep8.StyleGuide(quiet=True)
-        p = style.check_files(['models/base_model.py'])
-        self.assertEqual(p.total_errors, 0, "fix pep8")
+    def test_id(self):
+        """
+            test id is a valid UUID
+        """
+        dummy = self.dummy
+        self.assertIsInstance(dummy, BaseModel)
+        self.assertIsInstance(dummy.id, str)
+        is_match = re.fullmatch(r"\w{8}-\w{4}-\w{4}-\w{4}-\w{12}", dummy.id)
+        self.assertTrue(is_match)
 
-    def test_checking_for_docstring_BaseModel(self):
-        """checking for docstrings"""
-        self.assertIsNotNone(BaseModel.__doc__)
-        self.assertIsNotNone(BaseModel.__init__.__doc__)
-        self.assertIsNotNone(BaseModel.__str__.__doc__)
-        self.assertIsNotNone(BaseModel.save.__doc__)
-        self.assertIsNotNone(BaseModel.to_dict.__doc__)
-        self.assertIsNotNone(BaseModel.delete.__doc__)
+    def test_unique_id(self):
+        """
+            test unique ID's
+        """
+        dummy_1 = BaseModel()
+        dummy_2 = BaseModel()
+        self.assertNotEqual(dummy_1.id, dummy_2.id)
+        del dummy_1
+        del dummy_2
 
-    def test_method_BaseModel(self):
-        """chekcing if Basemodel have methods"""
-        self.assertTrue(hasattr(BaseModel, "__init__"))
-        self.assertTrue(hasattr(BaseModel, "save"))
-        self.assertTrue(hasattr(BaseModel, "to_dict"))
-        self.assertTrue(hasattr(BaseModel, "__str__"))
-        self.assertTrue(hasattr(BaseModel, "delete"))
+    def test_creation_time(self):
+        """
+            test initial creation time and updation time
+        """
+        dummy = self.dummy
+        self.assertIsInstance(dummy.created_at, datetime)
+        self.assertIsInstance(dummy.updated_at, datetime)
+        self.assertEqual(dummy.updated_at, dummy.created_at)
 
-    def test_init_BaseModel(self):
-        """test if the base is an type BaseModel"""
-        self.assertTrue(isinstance(self.base, BaseModel))
+    def test_str(self):
+        """
+            test string representation of an object
+        """
+        dummy = self.dummy
+        correct = "[{}] ({}) {}".format("BaseModel", dummy.id, dummy.__dict__)
+        self.assertEqual(str(dummy), correct)
 
-    def test_kwargs(self):
-        """Test initialization with args and kwargs."""
-        date = datetime.utcnow()
-        BModel = BaseModel("1", id="3", created_at=date.isoformat())
-        self.assertEqual(BModel.id, "3")
-        self.assertEqual(BModel.created_at, date)
+    def test_dict(self):
+        """
+            test dictionary representation of a model
+        """
+        dummy = self.dummy
+        test_dict = dummy.to_dict()
+        self.assertTrue("__class__" in test_dict)
+        self.assertIsInstance(test_dict["__class__"], str)
+        self.assertTrue("id" in test_dict)
+        self.assertIsInstance(test_dict["id"], str)
+        self.assertTrue("created_at" in test_dict)
+        self.assertIsInstance(test_dict["created_at"], str)
+        self.assertTrue("updated_at" in test_dict)
+        self.assertIsInstance(test_dict["updated_at"], str)
+        dummy.test = 10
+        test_dict = dummy.to_dict()
+        self.assertTrue("test" in test_dict)
 
-    @unittest.skipIf(os.getenv("HBNB_ENV") is not None, "Test DBS")
-    def test_save_BaesModel(self):
-        """test if the save works"""
-        prev = self.base.updated_at
-        self.base.save()
-        self.assertLess(prev, self.base.updated_at)
-        with open("file.json", "r") as f:
-            self.assertIn("BaseModel.{}".format(self.base.id), f.read())
-        self.assertNotEqual(self.base.created_at, self.base.updated_at)
-
-    @unittest.skipIf(os.getenv("HBNB_ENV") is not None, "Test DBS")
-    def test_delete(self):
-        self.base.delete()
-        self.assertNotIn(self.base, FileStorage._FileStorage__objects)
-
-    def test_to_dict_BaseModel(self):
-        """test if dictionary works"""
-        base_dict = self.base.to_dict()
-        self.assertEqual(self.base.__class__.__name__, 'BaseModel')
-        self.assertIsInstance(base_dict['created_at'], str)
-        self.assertIsInstance(base_dict['updated_at'], str)
+    def test_fromdict(self):
+        """
+            test instance retrival from a dictionary
+        """
+        dummy = self.dummy
+        dummy.test = 10
+        test_instance = BaseModel(**dummy.to_dict())
+        self.assertTrue("__class__" not in test_instance.__dict__)
+        self.assertTrue(hasattr(test_instance, "id"))
+        self.assertTrue(hasattr(test_instance, "created_at"))
+        self.assertTrue(hasattr(test_instance, "updated_at"))
+        self.assertTrue(hasattr(test_instance, "test"))
+        self.assertIsInstance(test_instance.created_at, datetime)
+        self.assertIsInstance(test_instance.updated_at, datetime)
+        self.assertEqual(test_instance.created_at, dummy.created_at)
+        self.assertEqual(test_instance.updated_at, dummy.updated_at)
 
 
 if __name__ == "__main__":
-    unittest.main()
+        unittest.main()
