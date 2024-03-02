@@ -1,18 +1,21 @@
 #!/usr/bin/python3
-"""This is the amenity class"""
+""" instances amenities """
 from models.base_model import BaseModel, Base
+from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String
+from models.place import Place
+from os import getenv
+
+STORAGE = getenv("HBNB_TYPE_STORAGE")
 
 
 class Amenity(BaseModel, Base):
-    """This is the class for Amenity
-    Attributes:
-        name: input name
-    """
-    __tablename__ = 'amenities'
-    name = Column(String(128), nullable=False)
-    place_amenities = relationship('Place',
-                                   secondary='place_amenity',
-                                   backref='amenities',
-                                   cascade='delete')
+    """Permit to add the amenities for places"""
+    __tablename__ = "amenities"
+    if STORAGE == "db":
+        name = Column(String(128), nullable=False)
+        place_amenities = relationship(
+            'Place', secondary=Place.place_amenity)
+
+    else:
+        name = ""
