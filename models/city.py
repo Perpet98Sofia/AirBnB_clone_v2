@@ -6,14 +6,18 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 
+STORAGE = getenv("HBNB_TYPE_STORAGE")
+
+
 class City(BaseModel, Base):
-    """This is the class for City
-    Attributes:
-        state_id: The state id
-        name: input name
-    """
+    """ The city class, contains state ID and name """
     __tablename__ = 'cities'
-    name = Column(String(128), nullable=False)
-    state_id = Column(String(60), ForeignKey('states.id'), nullable=False)
-    places = relationship('Place', backref='cities',
-                          cascade='delete')
+    if STORAGE == "db":
+        state_id = Column(String(60), ForeignKey('states.id'), nullable=False)
+        name = Column(String(128), nullable=False)
+        places = relationship('Place',
+                              backref='cities',
+                              cascade="all, delete-orphan")
+    else:
+        name = ""
+        state_id = ""
